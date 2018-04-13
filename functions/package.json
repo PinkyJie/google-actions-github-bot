@@ -14,10 +14,14 @@
   },
   "dependencies": {
     "actions-on-google": "^1.10.0",
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
     "firebase-admin": "~5.12.0",
     "firebase-functions": "^1.0.1"
   },
   "devDependencies": {
+    "@types/actions-on-google": "^1.10.0",
+    "@types/cheerio": "^0.22.7",
     "tslint": "^5.9.1",
     "typescript": "^2.8.1"
   },
