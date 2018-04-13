@@ -1,7 +1,7 @@
 {
   "name": "google-actions-github-bot",
   "version": "0.0.1",
-  "description": "Github Bot is an intelligent voice bot for Google Assistant.",
+  "description": "A Google Assistant Action (with an invocation name of \"Github Bot\") which tells you the trending repositories on Github and more.",
   "main": "lib/index.js",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
