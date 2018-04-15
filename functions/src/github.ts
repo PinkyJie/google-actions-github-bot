@@ -28,16 +28,22 @@ export function fetchTrending(
                     .replace(/ stars .+/, '')
                     .replace(',', '');
                 const description = $(repo).find('.py-1 p');
-                const speakableDescription = description[0].childNodes
-                    .filter(node => node.type === 'text')
-                    .map(node => node.nodeValue.trim())
-                    .join('');
+                const fullDescription = description.text().trim();
+                let speakableDescription;
+                if (fullDescription === '') {
+                    speakableDescription = '';
+                } else {
+                    speakableDescription = description[0].childNodes
+                        .filter(node => node.type === 'text')
+                        .map(node => node.nodeValue.trim())
+                        .join('');
+                }
 
                 repos.push({
                     author,
                     name,
                     href: 'https://github.com/' + title.replace(/ /g, ''),
-                    description: description.text().trim(),
+                    description: fullDescription,
                     speakableDescription,
                     language: $(repo).find('[itemprop=programmingLanguage]').text().trim(),
                     stars: parseInt(stars) || 0,

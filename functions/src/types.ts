@@ -10,5 +10,6 @@ export interface Repository {
 };
 
 export interface UserData {
-    repositories: Array<Repository>,
+    repositories: Repository[],
+    currentIndex: number,
 };

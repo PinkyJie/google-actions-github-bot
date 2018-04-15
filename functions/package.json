@@ -1,12 +1,13 @@
 {
   "name": "google-actions-github-bot",
   "version": "0.0.1",
-  "description": "A Google Assistant Action (with an invocation name of \"Github Bot\") which tells you the trending repositories on Github and more.",
+  "description": "A Google Assistant Action (with an invocation name of \"Github Trending\") which tells you the trending repositories on Github and more.",
   "main": "lib/index.js",
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "serve": "npm run build && firebase serve --only functions",
+    "watch": "tsc -w",
+    "serve": "concurrently \"npm run watch\" \"firebase serve --only functions\"",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "@types/actions-on-google": "^1.10.0",
     "@types/cheerio": "^0.22.7",
+    "concurrently": "^3.5.1",
     "tslint": "^5.9.1",
     "typescript": "^2.8.1"
   },
