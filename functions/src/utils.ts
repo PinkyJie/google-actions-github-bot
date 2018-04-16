@@ -4,7 +4,7 @@ export function getRepoParagraph(repo: Repository): string {
     const langStr = repo.language ? ` using language <emphasis>${repo.language}</emphasis>` : '';
     const description = repo.speakableDescription === '' ?
         'There is no description for this repository yet.' :
-        `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>.`;
+        `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>`;
     return `
         <break time="1s"/>
         <p>

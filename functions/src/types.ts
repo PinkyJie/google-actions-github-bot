@@ -11,5 +11,6 @@ export interface Repository {
 
 export interface UserData {
     repositories: Repository[],
-    currentIndex: number,
+    textIndex: number,
+    audioIndex: number,
 };

@@ -13,6 +13,11 @@ export const REPOSITORY_NEXT_ONE = [
     'Alright! Let\'s go to next one!',
     'Cool! Glad to hear you are interested! Next!',
 ];
+export const REPOSITORY_LOAD_MORE = [
+    'OK! More repositories are coming!',
+    'Alright! Let\'s go to next!',
+    'Cool! Glad to hear you are interested! Next!',
+];
 export const REPOSITORY_LAST_ONE = [
     'This is the last one.',
     'We have no more trending repositories today.',

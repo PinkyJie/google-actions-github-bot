@@ -23,12 +23,17 @@ const CONTEXTS = {
 export default class GithubBot {
     app: DialogflowApp;
     data: UserData;
+    hasScreen: boolean;
+    hasAudio: boolean;
 
     constructor (req, res) {
         console.log(`Headers: ${JSON.stringify(req.headers)}`);
         console.log(`Body: ${JSON.stringify(req.body)}`);
         this.app = new DialogflowApp({ request: req, response: res });
         this.data = this.app.data as UserData;
+        const { SCREEN_OUTPUT, AUDIO_OUTPUT } = this.app.SurfaceCapabilities;
+        this.hasScreen = this.app.hasSurfaceCapability(SCREEN_OUTPUT);
+        this.hasAudio = this.app.hasSurfaceCapability(AUDIO_OUTPUT);
     }
 
     run () {
@@ -42,18 +47,25 @@ export default class GithubBot {
         }
     }
 
+    clearData() {
+        this.data.textIndex = 0;
+        this.data.audioIndex = 0;
+        this.data.repositories = [];
+        this.app.setContext('');
+    }
+
     tellNextRepo() {
-        const { currentIndex, repositories } = this.data;
-        this.data.currentIndex += 1;
-        const greetingMsg = this.data.currentIndex === 0 ?
+        const { repositories } = this.data;
+        this.data.audioIndex += 1;
+        const greetingMsg = this.data.audioIndex === 0 ?
             PROMPTS.REPOSITORY_START :
             getRandomMessage(PROMPTS.REPOSITORY_NEXT_ONE);
         // if next one is the last one
-        if (this.data.currentIndex === repositories.length - 1) {
+        if (this.data.audioIndex === repositories.length - 1) {
             this.app.tell(`
                 <speak>
                     ${greetingMsg}
-                    ${getRepoParagraph(repositories[this.data.currentIndex])}
+                    ${getRepoParagraph(repositories[this.data.audioIndex])}
                     <break />
                     ${getRandomMessage(PROMPTS.REPOSITORY_LAST_ONE)}
                     ${getRandomMessage(PROMPTS.GOODBYE)}
@@ -64,11 +76,47 @@ export default class GithubBot {
             this.app.ask(`
                 <speak>
                     ${greetingMsg}
-                    ${getRepoParagraph(repositories[this.data.currentIndex])}
+                    ${getRepoParagraph(repositories[this.data.audioIndex])}
                     <break />
                     ${getRandomMessage(PROMPTS.MORE_REPOSITORIES)}
                 </speak>
             `);
+        }
+    }
+
+    showRepoCarousel(count = 5) {
+        const { textIndex, repositories } = this.data;
+        const repos = repositories.slice(textIndex, textIndex + count);
+        const items = repos.map(repo =>
+            this.app.buildBrowseItem(`${repo.author} / ${repo.name}`, repo.href)
+                .setDescription(repo.description)
+                .setFooter(`Stars: ${repo.stars}`)
+        );
+        const carousel = this.app.buildBrowseCarousel()
+            .addItems(items);
+
+        let greetingMsg;
+        if (textIndex === 0) {
+            greetingMsg = PROMPTS.REPOSITORY_START;
+        } else {
+            greetingMsg = getRandomMessage(PROMPTS.REPOSITORY_LOAD_MORE);
+        }
+        this.data.textIndex = textIndex + count;
+        const response = this.app.buildRichResponse()
+            .addSimpleResponse(greetingMsg)
+            .addBrowseCarousel(carousel);
+        if (this.data.textIndex < repositories.length) {
+            response.addSuggestions(['Load more']);
+            this.app.setContext(CONTEXTS.FETCH_TRENDING_FOLLOWUP, 2);
+            this.app.ask(response);
+        } else {
+            response.addSimpleResponse(`
+                <speak>
+                    ${getRandomMessage(PROMPTS.REPOSITORY_LAST_ONE)}
+                    ${getRandomMessage(PROMPTS.GOODBYE)}
+                </speak>
+            `);
+            this.app.tell(response);
         }
     }
 
@@ -82,7 +130,6 @@ export default class GithubBot {
         promise
             .then(repos => {
                 this.data.repositories = repos;
-                this.data.currentIndex = -1;
                 if (repos.length === 0) {
                     this.app.tell(`
                         <speak>
@@ -92,7 +139,13 @@ export default class GithubBot {
                         </speak>
                     `);
                 } else {
-                    this.tellNextRepo();
+                    if (this.hasScreen) {
+                        this.data.textIndex = 0;
+                        this.showRepoCarousel();
+                    } else if (this.hasAudio) {
+                        this.data.audioIndex = -1;
+                        this.tellNextRepo();
+                    }
                 }
             })
             .catch(err => {
@@ -102,12 +155,15 @@ export default class GithubBot {
     }
 
     [ACTIONS.FETCH_TRENDING_NEXT_YES] () {
-        this.tellNextRepo();
+        if (this.hasScreen) {
+            this.showRepoCarousel();
+        } else if (this.hasAudio) {
+            this.tellNextRepo();
+        }
     }
 
     [ACTIONS.FETCH_TRENDING_NEXT_NO] () {
-        this.data.currentIndex = 0;
-        this.data.repositories = [];
+        this.clearData();
         this.app.tell(`
             <speak>
                 ${PROMPTS.REPOSITORY_NO_MORE}
