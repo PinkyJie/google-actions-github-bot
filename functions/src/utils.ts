@@ -6,7 +6,6 @@ export function getRepoParagraph(repo: Repository): string {
         'There is no description for this repository yet.' :
         `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>`;
     return `
-        <break time="1s"/>
         <p>
             The repository named <emphasis>${repo.name}</emphasis>, which is created by <emphasis>${repo.author}</emphasis>${langStr}
         </p>
