@@ -7,6 +7,7 @@ import { getRepoParagraph, getRandomMessage, getRepoStartMessage } from './utils
 
 const ACTIONS = {
     WELCOME: 'input.welcome',
+    HELP: 'help',
     FETCH_TRENDING: 'fetch_trending',
     FETCH_TRENDING_NEXT_YES: 'fetch_trending.fetch_trending-yes',
     FETCH_TRENDING_NEXT_NO: 'fetch_trending.fetch_trending-no',
@@ -19,7 +20,6 @@ const PARAMETERS = {
 const CONTEXTS = {
     FETCH_TRENDING_FOLLOWUP: 'fetch_trending-followup',
 };
-
 
 export default class GithubBot {
     app: DialogflowApp;
@@ -50,6 +50,15 @@ export default class GithubBot {
 
     [ACTIONS.WELCOME] () {
         this.app.ask(getRandomMessage(PROMPTS.WELCOME_MESSAGE), PROMPTS.NO_INPUT_WELCOME);
+    }
+
+    [ACTIONS.HELP] () {
+        this.app.ask([
+            '<speak>',
+                PROMPTS.HELP,
+                PROMPTS.COMMAND_INTRODUCE,
+            '</speak>'
+        ].join('<break />'));
     }
 
     [ACTIONS.FETCH_TRENDING] () {
