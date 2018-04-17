@@ -12,4 +12,6 @@ export interface Repository {
 export interface UserData {
     repositories: Repository[],
     currentIndex: number,
+    language: string,
+    hasRejected: boolean,
 };

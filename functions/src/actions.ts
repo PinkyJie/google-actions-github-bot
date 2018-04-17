@@ -3,9 +3,10 @@ import { DialogflowApp } from 'actions-on-google';
 import { fetchTrending } from './github';
 import { UserData } from './types';
 import * as PROMPTS from './prompts';
-import { getRepoParagraph, getRandomMessage } from './utils';
+import { getRepoParagraph, getRandomMessage, getRepoStartMessage } from './utils';
 
 const ACTIONS = {
+    WELCOME: 'input.welcome',
     FETCH_TRENDING: 'fetch_trending',
     FETCH_TRENDING_NEXT_YES: 'fetch_trending.fetch_trending-yes',
     FETCH_TRENDING_NEXT_NO: 'fetch_trending.fetch_trending-no',
@@ -36,73 +37,38 @@ export default class GithubBot {
         console.log(`Parameter: ${this.app.getArgument(PARAMETERS.LANGUAGE)}`);
         console.log(`Action: ${action}`);
         if (!action) {
-            this.app.ask(PROMPTS.SORRY_RESPONSE);
+            this.app.ask([
+                '<speak>',
+                    PROMPTS.SORRY_RESPONSE,
+                    PROMPTS.HELP,
+                    PROMPTS.COMMAND_INTRODUCE,
+            ].join('<break />'));
         } else {
             this[action]();
         }
     }
 
-    clearData() {
-        this.data.currentIndex = -1;
-        this.data.repositories = [];
-        this.app.setContext('');
-    }
-
-    nextRepo() {
-        const { repositories } = this.data;
-        this.data.currentIndex += 1;
-        const nextRepo = repositories[this.data.currentIndex];
-
-        const greetingMsg = this.data.currentIndex === 0 ?
-            PROMPTS.REPOSITORY_START :
-            getRandomMessage(PROMPTS.REPOSITORY_NEXT_ONE);
-
-        const audioResponse = [
-            getRepoParagraph(nextRepo),
-        ];
-        const cardItem = this.app.buildBasicCard(nextRepo.description)
-            .setTitle(`${nextRepo.author} / ${nextRepo.name}`)
-            .setSubtitle(`Stars: ${nextRepo.stars}`)
-            .addButton('Read more on Github', nextRepo.href);
-        const response = this.app.buildRichResponse()
-            .addSimpleResponse(greetingMsg)
-            .addBasicCard(cardItem);
-
-        let method;
-        // if next one is the last one
-        if (this.data.currentIndex === repositories.length - 1) {
-            this.clearData();
-            audioResponse.push(getRandomMessage(PROMPTS.REPOSITORY_LAST_ONE));
-            audioResponse.push(getRandomMessage(PROMPTS.GOODBYE));
-            method = 'tell';
-        } else {
-            this.app.setContext(CONTEXTS.FETCH_TRENDING_FOLLOWUP, 2);
-            audioResponse.push(getRandomMessage(PROMPTS.MORE_REPOSITORIES));
-            response.addSuggestions([
-                getRandomMessage(PROMPTS.REPOSITORY_NEXT_BUTTON),
-                getRandomMessage(PROMPTS.REPOSITORY_GOODBYE_BUTTON),
-            ]);
-            method = 'ask';
-        }
-        response.addSimpleResponse([
-            '<speak>',
-                ...audioResponse,
-            '</speak>',
-        ].join('<break />'));
-
-        this.app[method](response);
+    [ACTIONS.WELCOME] () {
+        this.app.ask(getRandomMessage(PROMPTS.WELCOME_MESSAGE), PROMPTS.NO_INPUT_WELCOME);
     }
 
     [ACTIONS.FETCH_TRENDING] () {
+        const { language, repositories } = this.data;
+        const arg = this.app.getArgument(PARAMETERS.LANGUAGE);
+        const lang = arg ? arg.toString() : '';
         let promise;
-        if (this.data.repositories && this.data.repositories.length > 0) {
-            promise = Promise.resolve(this.data.repositories);
+        if (repositories &&
+            repositories.length > 0 &&
+            language === lang
+        ) {
+            promise = Promise.resolve(repositories);
         } else {
-            promise = fetchTrending();
+            promise = fetchTrending(lang);
         }
         promise
             .then(repos => {
                 this.data.repositories = repos;
+                this.data.language = lang;
                 if (repos.length === 0) {
                     this.app.tell([
                         '<speak>',
@@ -127,12 +93,68 @@ export default class GithubBot {
     }
 
     [ACTIONS.FETCH_TRENDING_NEXT_NO] () {
-        this.clearData();
-        this.app.tell([
+        if (this.data.hasRejected || this.data.language !== '') {
+            this.app.tell([
+                '<speak>',
+                    getRandomMessage(PROMPTS.GOODBYE),
+                '</speak>',
+            ].join('<break />'));
+        } else {
+            this.data.hasRejected = true;
+            this.app.ask([
+                '<speak>',
+                    PROMPTS.REPOSITORY_NO_MORE,
+                    PROMPTS.REPOSITORY_OTHER_LANGUAGE,
+                '</speak>',
+            ].join('<break />'), PROMPTS.NO_INPUT_OTHER_LANGUAGES);
+        }
+    }
+
+    nextRepo() {
+        const { repositories } = this.data;
+        this.data.currentIndex += 1;
+        const nextRepo = repositories[this.data.currentIndex];
+
+        const greetingMsg = this.data.currentIndex === 0 ?
+            getRepoStartMessage(this.data.language) :
+            getRandomMessage(PROMPTS.REPOSITORY_NEXT_ONE);
+
+        const audioResponse = [
+            getRepoParagraph(nextRepo),
+        ];
+        const cardItem = this.app.buildBasicCard(nextRepo.description)
+            .setTitle(`${nextRepo.author} / ${nextRepo.name}`)
+            .setSubtitle(`Stars: ${nextRepo.stars}`)
+            .addButton('Read more on Github', nextRepo.href);
+        const response = this.app.buildRichResponse()
+            .addSimpleResponse(greetingMsg)
+            .addBasicCard(cardItem);
+
+        let method;
+        // if next one is the last one
+        if (this.data.currentIndex === repositories.length - 1) {
+            audioResponse.push(getRandomMessage(PROMPTS.REPOSITORY_LAST_ONE));
+            audioResponse.push(getRandomMessage(PROMPTS.GOODBYE));
+            method = 'tell';
+        } else {
+            this.app.setContext(CONTEXTS.FETCH_TRENDING_FOLLOWUP, 3);
+            audioResponse.push(getRandomMessage(PROMPTS.MORE_REPOSITORIES));
+            response.addSuggestions([
+                getRandomMessage(PROMPTS.REPOSITORY_NEXT_BUTTON),
+                getRandomMessage(PROMPTS.REPOSITORY_GOODBYE_BUTTON),
+            ]);
+            method = 'ask';
+        }
+        response.addSimpleResponse([
             '<speak>',
-                PROMPTS.REPOSITORY_NO_MORE,
-                getRandomMessage(PROMPTS.GOODBYE),
+                ...audioResponse,
             '</speak>',
         ].join('<break />'));
+
+        if (method === 'ask') {
+            this.app.ask(response, PROMPTS.NO_INPUT_MORE_REPOSITORIES);
+        } else {
+            this.app.tell(response);
+        }
     }
 }

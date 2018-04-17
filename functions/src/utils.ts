@@ -21,3 +21,12 @@ export function getRandomMessage(messages: string[]) {
     const randomIndex = Math.floor(Math.random() * messages.length);
     return messages[randomIndex];
 }
+
+export function getRepoStartMessage(language, period = 'today') {
+    const str1 = 'Sure! Here are the trending repositories';
+    const str2 = `on Github ${period}.`;
+    if (language === '') {
+        return `${str1} ${str2}`;
+    }
+    return `${str1} for ${language} ${str2}`
+}
