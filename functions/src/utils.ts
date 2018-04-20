@@ -30,3 +30,11 @@ export function getRepoStartMessage(language, period = 'today') {
     }
     return `${str1} for ${language} ${str2}`
 }
+
+export function wrapWithSpeak(array) {
+    return [
+        '<speak>',
+            ...array,
+        '</speak>'
+    ].join('<break />');
+}

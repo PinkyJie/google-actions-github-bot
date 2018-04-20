@@ -55,5 +55,5 @@ export const REPOSITORY_NEXT_BUTTON = [
 ];
 export const REPOSITORY_GOODBYE_BUTTON = [
     'Not interested',
-    'Goodbye',
+    'No more',
 ];

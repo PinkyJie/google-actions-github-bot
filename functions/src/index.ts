@@ -1,8 +1,4 @@
 import * as functions from 'firebase-functions';
-import GithubBot from './actions';
+import app from './actions';
 
-process.env.DEBUG = 'actions-on-google:*';
-
-export const githubBot = functions.https.onRequest((req, res) =>
-    new GithubBot(req, res).run()
-);
+export const githubBot = functions.https.onRequest(app);
