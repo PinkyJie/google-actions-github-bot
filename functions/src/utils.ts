@@ -38,3 +38,12 @@ export function wrapWithSpeak(array) {
         '</speak>'
     ].join('<break />');
 }
+
+export function getStarredMessage(repo: Repository) {
+    const messages = [
+        `Cool! Repository ${repo.name} is already starred for you on Github.`,
+        `Done! Repository ${repo.name} is in your star list on Github.`,
+        `Alright! Repository ${repo.name} is starred, go to Github and check it out.`,
+    ];
+    return getRandomMessage(messages);
+}

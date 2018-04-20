@@ -1,18 +1,23 @@
 import {
     dialogflow,
-    SimpleResponse,
-    RichResponse,
     BasicCard,
     Suggestions,
     Button,
     DialogflowConversation,
     Contexts,
+    SignIn,
 } from 'actions-on-google';
 
-import { fetchTrending } from './github';
+import { fetchTrending, starRepository } from './github';
 import { UserData } from './types';
 import * as PROMPTS from './prompts';
-import { getRepoParagraph, getRandomMessage, getRepoStartMessage, wrapWithSpeak } from './utils';
+import {
+    getRepoParagraph,
+    getRandomMessage,
+    getRepoStartMessage,
+    wrapWithSpeak,
+    getStarredMessage,
+} from './utils';
 
 const INTENTS = {
     WELCOME: 'Default Welcome Intent',
@@ -22,6 +27,7 @@ const INTENTS = {
     FETCH_TRENDING_NO_INPUT: 'Fetch Trending - No Input',
     FETCH_TRENDING_NEXT_YES: 'Fetch Trending - Yes',
     FETCH_TRENDING_NEXT_NO: 'Fetch Trending - No',
+    STAR_IT: 'Fetch Trending - Star It',
 };
 
 const PARAMETERS = {
@@ -80,7 +86,7 @@ app.intent(INTENTS.FETCH_TRENDING, conv => {
                 ]));
             } else {
                 data.currentIndex = -1;
-                nextRepo(conv);
+                goToNextRepo(conv);
             }
         })
         .catch(err => {
@@ -90,7 +96,7 @@ app.intent(INTENTS.FETCH_TRENDING, conv => {
 });
 
 app.intent(INTENTS.FETCH_TRENDING_NEXT_YES, conv => {
-    nextRepo(conv);
+    goToNextRepo(conv);
 });
 
 app.intent(INTENTS.FETCH_TRENDING_NEXT_NO, conv => {
@@ -112,6 +118,34 @@ app.intent(INTENTS.FETCH_TRENDING_NO_INPUT, conv => {
     handleReprompt(conv, PROMPTS.NO_INPUT_MORE_REPOSITORIES);
 });
 
+app.intent(INTENTS.STAR_IT, conv => {
+    console.log('TTTTT');
+    const data = conv.data as UserData;
+    const { currentIndex, repositories } = data;
+    const currentRepo = repositories[currentIndex];
+
+    const token = conv.request.user.accessToken;
+    if (token) {
+        return starRepository(currentRepo, token)
+            .then(() => {
+                conv.contexts.set(CONTEXTS.FETCH_TRENDING_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
+                conv.ask(wrapWithSpeak([
+                    getStarredMessage(currentRepo),
+                    getRandomMessage(PROMPTS.MORE_REPOSITORIES),
+                ]));
+            })
+            .catch(err => {
+                console.log('Error: ', err);
+                conv.close(PROMPTS.NETWORK_ERROR);
+            });
+    } else {
+        return Promise.resolve()
+            .then(() => {
+                conv.ask(new SignIn());
+            });
+    }
+});
+
 export default app;
 
 // Useful functions
@@ -125,7 +159,7 @@ function handleReprompt(conv: CONV_TYPE, messages) {
     }
 }
 
-function nextRepo(conv: CONV_TYPE) {
+function goToNextRepo(conv: CONV_TYPE) {
     const data = conv.data as UserData;
     const { repositories } = data;
     data.currentIndex += 1;
@@ -158,6 +192,7 @@ function nextRepo(conv: CONV_TYPE) {
         conv.ask(
             new Suggestions(
                 getRandomMessage(PROMPTS.REPOSITORY_NEXT_BUTTON),
+                getRandomMessage(PROMPTS.REPOSITORY_STAR_BUTTON),
                 getRandomMessage(PROMPTS.REPOSITORY_GOODBYE_BUTTON),
             ),
             cardItem,

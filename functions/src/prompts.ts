@@ -41,19 +41,25 @@ export const REPOSITORY_LAST_ONE = [
     'We have no more trending repositories today.',
     'You\'ve mastered all trending repositories today!',
 ];
-export const GOODBYE = [
-    'Okay! We can stop right there, Bye bye!',
-    'Alright! See you later! Bye!',
-    'OKay! Please come later to know more! Goodbye!'
-];
 export const REPOSITORY_NO_MORE = 'Sorry to hear that you are not interested!';
 export const REPOSITORY_OTHER_LANGUAGE = 'If you want to know the trending for a specific languages, just ask me "Tell me the trending repositories for Javascript today".';
+
 export const REPOSITORY_NEXT_BUTTON = [
     'Explore more',
     'Next',
     'Go on',
 ];
+export const REPOSITORY_STAR_BUTTON = [
+    'I Like it',
+    'Star it',
+];
 export const REPOSITORY_GOODBYE_BUTTON = [
     'Not interested',
     'No more',
+];
+
+export const GOODBYE = [
+    'Okay! We can stop right there, Bye bye!',
+    'Alright! See you later! Bye!',
+    'OKay! Please come later to know more! Goodbye!'
 ];

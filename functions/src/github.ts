@@ -53,3 +53,12 @@ export function fetchTrending(
             return repos;
         });
 }
+
+export function starRepository(repo: Repository, token: string) {
+    const url = `https://api.github.com/user/starred/${repo.author}/${repo.name}`;
+    return axios.put(url, null, {
+        headers: {
+            Authorization: `token ${token}`,
+        },
+    });
+}
