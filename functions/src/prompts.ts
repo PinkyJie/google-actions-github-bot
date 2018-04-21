@@ -44,6 +44,18 @@ export const REPOSITORY_LAST_ONE = [
 export const REPOSITORY_NO_MORE = 'Sorry to hear that you are not interested!';
 export const REPOSITORY_OTHER_LANGUAGE = 'If you want to know the trending for a specific languages, just ask me "Tell me the trending repositories for Javascript today".';
 
+export const SIGN_IN_YES = [
+    'Cool! Your Github is already linked. I\'ll star the repository for you!',
+    'Nice! Github account is linked successfully. Let me star that repository for you.',
+    'Bravo! Github linked! You\'ve unlocked new feature from Github Trending. Now I\'ll star that repository.',
+];
+
+export const SIGN_IN_NO = [
+    'Sure! It\'s fine you don\'t want to link your Github. Do you wish you continue on next repository?',
+    'Okay! Without your Github I can\'t star the repository for you. But you can still go on with the next interesting repository. Shall we go to next one?',
+    'Alright! We can still explore more repository without linking your Github. Would you like to go to next repository?',
+];
+
 export const REPOSITORY_NEXT_BUTTON = [
     'Explore more',
     'Next',
