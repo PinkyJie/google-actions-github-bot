@@ -1,4 +1,4 @@
-import { Repository } from './types';
+import { Repository, User } from './types';
 
 export function getRepoParagraph(repo: Repository): string {
     const langStr = repo.language ? ` using language <emphasis>${repo.language}</emphasis>` : '';
@@ -44,6 +44,15 @@ export function getStarredMessage(repo: Repository) {
         `Cool! Repository ${repo.name} is already starred for you on Github.`,
         `Done! Repository ${repo.name} is in your star list on Github.`,
         `Alright! Repository ${repo.name} is starred, go to Github and check it out.`,
+    ];
+    return getRandomMessage(messages);
+}
+
+export function getAccountLinkedMessage(user: User) {
+    const messages = [
+        `Cool! ${user.name}, your Github account ${user.login} is already linked. I\'ll star the repository for you!`,
+        `Nice! ${user.name}, github account ${user.login} is linked successfully. Let me star that repository for you.`,
+        `Bravo! ${user.name}, github account ${user.login} linked! You\'ve unlocked new feature from Github Trending. Now I\'ll star that repository.`,
     ];
     return getRandomMessage(messages);
 }

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 
-import { Repository } from './types';
+import { Repository, User } from './types';
 
 export function fetchTrending(
     lang: string = '',
@@ -60,5 +60,16 @@ export function starRepository(repo: Repository, token: string) {
         headers: {
             Authorization: `token ${token}`,
         },
+    });
+}
+
+export function getUserInfo(token: string) {
+    const url = `https://api.github.com/user`;
+    return axios.get(url, {
+        headers: {
+            Authorization: `token ${token}`,
+        },
+    }).then(response => {
+        return response.data as User;
     });
 }

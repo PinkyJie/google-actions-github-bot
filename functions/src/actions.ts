@@ -3,13 +3,12 @@ import {
     BasicCard,
     Suggestions,
     Button,
-    DialogflowConversation,
-    Contexts,
     SignIn,
+    NewSurface,
 } from 'actions-on-google';
 
-import { fetchTrending, starRepository } from './github';
-import { UserData, Repository } from './types';
+import { fetchTrending, starRepository, getUserInfo } from './github';
+import { UserData, Repository, CONV_TYPE, IntentResult } from './types';
 import * as PROMPTS from './prompts';
 import {
     getRepoParagraph,
@@ -17,6 +16,7 @@ import {
     getRepoStartMessage,
     wrapWithSpeak,
     getStarredMessage,
+    getAccountLinkedMessage,
 } from './utils';
 
 const INTENTS = {
@@ -28,8 +28,8 @@ const INTENTS = {
     FETCH_TRENDING_NEXT_YES: 'Fetch Trending - Yes',
     FETCH_TRENDING_NEXT_NO: 'Fetch Trending - No',
     STAR_IT: 'Fetch Trending - Star It',
-    SIGN_IN_YES: 'Sign In - Yes',
-    SIGN_IN_NO: 'Sign In - No',
+    SIGN_IN_RESULT: 'Sign In - Result',
+    NEW_SURFACE_RESULT: 'New Surface - Result',
 };
 
 const PARAMETERS = {
@@ -39,11 +39,9 @@ const PARAMETERS = {
 const CONTEXTS = {
     WELCOME_FOLLOWUP: 'DefaultWelcomeIntent-followup',
     FETCH_TRENDING_FOLLOWUP: 'FetchTrending-followup',
-    SIGN_IN_FOLLOWUP: 'SignIn-followup',
 };
 const DEFAULT_CONTEXT_LIFE_SPAN = 3;
-
-type CONV_TYPE = DialogflowConversation<{}, {}, Contexts>;
+const SIGN_SURFACE_CAPABILITY = 'actions.capability.SCREEN_OUTPUT';
 
 // ACTIONS
 const app = dialogflow({debug: true});
@@ -126,29 +124,41 @@ app.intent(INTENTS.STAR_IT, conv => {
     const { currentIndex, repositories } = data;
     const currentRepo = repositories[currentIndex];
 
-    const token = conv.request.user.accessToken;
+    const token = conv.user.access.token;
     if (token) {
         return startRepo(currentRepo, conv);
     } else {
-        conv.contexts.set(CONTEXTS.SIGN_IN_FOLLOWUP, 1);
-        return Promise.resolve()
-            .then(() => {
-                conv.ask(new SignIn());
-            });
+        return handleSignIn(conv);
     }
 });
 
-app.intent(INTENTS.SIGN_IN_YES, conv => {
+app.intent(INTENTS.SIGN_IN_RESULT, (conv, params, signInResult) => {
+    const status = (signInResult as IntentResult).status;
+    console.log('sign in result: ', status);
+    if (status !== 'OK') {
+        conv.contexts.set(CONTEXTS.FETCH_TRENDING_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
+        return conv.ask(getRandomMessage(PROMPTS.SIGN_IN_NO));
+    }
+
     const data = conv.data as UserData;
     const { currentIndex, repositories } = data;
     const currentRepo = repositories[currentIndex];
 
-    conv.ask(getRandomMessage(PROMPTS.SIGN_IN_YES));
-    return startRepo(currentRepo, conv);
+    return getUserInfo(conv.user.access.token)
+        .then(user => {
+            conv.ask(getAccountLinkedMessage(user));
+            return startRepo(currentRepo, conv);
+        });
 });
 
-app.intent(INTENTS.SIGN_IN_NO, conv => {
-    conv.ask(getRandomMessage(PROMPTS.SIGN_IN_NO));
+app.intent(INTENTS.NEW_SURFACE_RESULT, (conv, params, newSurfaceResult) => {
+    const status = (newSurfaceResult as IntentResult).status;
+    console.log('new surface result: ', status);
+    if (status === 'OK') {
+        return conv.ask(new SignIn());
+    } else {
+        return conv.ask(PROMPTS.SIGN_IN_TRANSFER_NO);
+    }
 });
 
 export default app;
@@ -202,9 +212,12 @@ function goToNextRepo(conv: CONV_TYPE) {
             ),
             cardItem,
         );
+        const askForStarOrForNext = Math.random() > 0.5;
         conv.ask(wrapWithSpeak([
             getRepoParagraph(nextRepo),
-            getRandomMessage(PROMPTS.MORE_REPOSITORIES),
+            askForStarOrForNext ?
+                getRandomMessage(PROMPTS.ASK_FOR_NEXT_REPOSITORIES) :
+                getRandomMessage(PROMPTS.ASK_FOR_STAR_REPOSITORY),
         ]));
     }
 }
@@ -216,11 +229,29 @@ function startRepo(repo: Repository, conv: CONV_TYPE) {
             conv.contexts.set(CONTEXTS.FETCH_TRENDING_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
             conv.ask(wrapWithSpeak([
                 getStarredMessage(repo),
-                getRandomMessage(PROMPTS.MORE_REPOSITORIES),
+                getRandomMessage(PROMPTS.ASK_FOR_NEXT_REPOSITORIES),
             ]));
         })
         .catch(err => {
             console.log('Error: ', err);
             conv.close(PROMPTS.NETWORK_ERROR);
         });
+}
+
+function handleSignIn(conv: CONV_TYPE) {
+    const hasScreen = conv.surface.capabilities.has(SIGN_SURFACE_CAPABILITY);
+    if (hasScreen) {
+        return conv.ask(new SignIn());
+    }
+    const screenAvailable = conv.available.surfaces.capabilities.has(SIGN_SURFACE_CAPABILITY);
+    if (screenAvailable) {
+        return conv.ask(new NewSurface({
+            context: PROMPTS.SIGN_IN_ASK_FOR_TRANSFER,
+            notification: 'Link Github to star a repository',
+            capabilities: SIGN_SURFACE_CAPABILITY
+        }));
+    } else {
+        conv.contexts.set(CONTEXTS.FETCH_TRENDING_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
+        return conv.ask(PROMPTS.SIGN_IN_NOT_SUPPORTED);
+    };
 }
