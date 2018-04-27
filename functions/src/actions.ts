@@ -48,7 +48,11 @@ const app = dialogflow({debug: true});
 
 app.intent(INTENTS.WELCOME, conv => {
     conv.contexts.set(CONTEXTS.WELCOME_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
-    conv.ask(getRandomMessage(PROMPTS.WELCOME_MESSAGE));
+    conv.ask(getRandomMessage(PROMPTS.WELCOME_MESSAGE), new Suggestions(
+        'Tell me the trending repositories',
+        'Trending for Javascript',
+        'I need some help',
+    ));
 });
 
 app.intent(INTENTS.WELCOME_NO_INPUT, conv => {

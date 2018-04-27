@@ -1,9 +1,9 @@
 export const SORRY_RESPONSE = 'My apologies, I don\'t understand! I will keep learning.';
 
 export const WELCOME_MESSAGE = [
-    'Hi! Welcome to Github Trending! What can I do for you?',
-    'Yo! Github Trending here! How can I help you today?',
-    'Hey! I\'m Github Trending. What would you like to know today?',
+    'Hi! Welcome to Github Trending! I can help you learn the trending repositories on Github. Try to ask me "Tell me the trending repositories on Github today".',
+    'Yo! Github Trending here! I\'m ready to tell you the trending repository today, you can ask me "What\'s the trending repositories for Java on Github today?".',
+    'Hey! I\'m Github Trending. Ready for some exciting repositories? Ask me "the trending repositories for your favorite language" when you are ready.',
 ];
 export const HELP = 'Okay, let me introduce myself. I know all the trending repositories on Github.';
 export const COMMAND_INTRODUCE = 'You can ask me "tell me the trending repositories on Github today". If you are interested of a specific language, just ask me "the trending repositories for Javascript on Github today". Try it now!';
