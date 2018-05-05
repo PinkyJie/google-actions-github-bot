@@ -5,7 +5,7 @@ import { Repository, User } from './types';
 
 export function fetchTrending(
     lang: string = '',
-    since: 'daily' | 'weekly' | 'monthly' = 'daily',
+    since: string = 'daily',
 ) {
     const url = `https://github.com/trending/${encodeURIComponent(lang)}?since=${since}`;
     return axios.get(url)

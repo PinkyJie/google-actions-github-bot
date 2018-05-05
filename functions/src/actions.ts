@@ -34,6 +34,7 @@ const INTENTS = {
 
 const PARAMETERS = {
     LANGUAGE: 'programming_language',
+    PERIOD: 'period',
 };
 
 const CONTEXTS = {
@@ -49,7 +50,7 @@ const app = dialogflow({debug: true});
 app.intent(INTENTS.WELCOME, conv => {
     conv.contexts.set(CONTEXTS.WELCOME_FOLLOWUP, DEFAULT_CONTEXT_LIFE_SPAN);
     conv.ask(getRandomMessage(PROMPTS.WELCOME_MESSAGE), new Suggestions(
-        'Tell me the trending repositories',
+        'Trending repositories',
         'Trending for Javascript',
         'I need some help',
     ));
@@ -68,29 +69,33 @@ app.intent(INTENTS.HELP, conv => {
 
 app.intent(INTENTS.FETCH_TRENDING, conv => {
     const data = conv.data as UserData;
-    const { language, repositories } = data;
-    const arg = conv.parameters[PARAMETERS.LANGUAGE];
-    const lang = arg ? arg.toString() : '';
+    const { language, repositories, period } = data;
+    const args = conv.parameters;
+    const languageParam = args[PARAMETERS.LANGUAGE] ? args[PARAMETERS.LANGUAGE].toString() : '';
+    const periodParam = args[PARAMETERS.PERIOD] ? args[PARAMETERS.PERIOD].toString() : 'daily';
     let promise;
     if (repositories &&
         repositories.length > 0 &&
-        language === lang
+        language === languageParam &&
+        period === periodParam
     ) {
         promise = Promise.resolve(repositories);
+        // reuse existing index
     } else {
-        promise = fetchTrending(lang);
+        promise = fetchTrending(languageParam, periodParam);
+        data.currentIndex = -1;
     }
     return promise
         .then(repos => {
             data.repositories = repos;
-            data.language = lang;
+            data.language = languageParam;
+            data.period = periodParam;
             if (repos.length === 0) {
                 conv.close(wrapWithSpeak([
                     PROMPTS.EMPTY_REPOSITORY,
                     getRandomMessage(PROMPTS.GOODBYE),
                 ]));
             } else {
-                data.currentIndex = -1;
                 goToNextRepo(conv);
             }
         })
@@ -185,7 +190,7 @@ function goToNextRepo(conv: CONV_TYPE) {
     const nextRepo = repositories[data.currentIndex];
 
     const greetingMsg = data.currentIndex === 0 ?
-        getRepoStartMessage(data.language) :
+        getRepoStartMessage(data.language, data.period) :
         getRandomMessage(PROMPTS.REPOSITORY_NEXT_ONE);
 
     const cardItem = new BasicCard({

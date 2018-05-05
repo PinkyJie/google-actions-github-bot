@@ -1,8 +1,8 @@
 export const SORRY_RESPONSE = 'My apologies, I don\'t understand! I will keep learning.';
 
 export const WELCOME_MESSAGE = [
-    'Hi! Welcome to Github Trending! I can help you learn the trending repositories on Github. Try to ask me "Tell me the trending repositories on Github today".',
-    'Yo! Github Trending here! I\'m ready to tell you the trending repository today, you can ask me "What\'s the trending repositories for Java on Github today?".',
+    'Hi! Welcome to Github Trending! I can help you learn the trending repositories on Github. Try to ask me "Tell me the trending repositories on Github today or this month".',
+    'Yo! Github Trending here! I\'m ready to tell you the trending repository today, you can ask me "What\'s the trending repositories for Java on Github today or this week?".',
     'Hey! I\'m Github Trending. Ready for some exciting repositories? Ask me "the trending repositories for your favorite language" when you are ready.',
 ];
 export const HELP = 'Okay, let me introduce myself. I know all the trending repositories on Github.';

@@ -24,6 +24,7 @@ export interface UserData {
     repositories: Repository[],
     currentIndex: number,
     language: string,
+    period: string,
     hasRejected: boolean,
 };
 

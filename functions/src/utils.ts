@@ -22,13 +22,27 @@ export function getRandomMessage(messages: string[]) {
     return messages[randomIndex];
 }
 
-export function getRepoStartMessage(language, period = 'today') {
+export function getRepoStartMessage(language, period) {
     const str1 = 'Sure! Here are the trending repositories';
-    const str2 = `on Github ${period}.`;
-    if (language === '') {
-        return `${str1} ${str2}`;
+    const str2 = `on Github`;
+    let periodText;
+    switch (period) {
+        case 'daily':
+            periodText = 'today';
+            break;
+        case 'weekly':
+            periodText = 'in this week';
+            break;
+        case 'monthly':
+            periodText = 'in this month';
+            break;
+        default:
+            periodText = 'today';
     }
-    return `${str1} for ${language} ${str2}`
+    if (language === '') {
+        return `${str1} ${str2} ${periodText}.`;
+    }
+    return `${str1} for ${language} ${str2} ${periodText}.`;
 }
 
 export function wrapWithSpeak(array) {
