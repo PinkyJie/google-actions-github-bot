@@ -1,7 +1,8 @@
 import { Repository, User } from './types';
 
-export function getRepoParagraph(repo: Repository): string {
+export function getRepoParagraph(repo: Repository, period: string): string {
     const langStr = repo.language ? ` using language <emphasis>${repo.language}</emphasis>` : '';
+    const periodText = getPeriodText(period);
     const description = repo.speakableDescription === '' ?
         'There is no description for this repository yet.' :
         `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>`;
@@ -12,7 +13,7 @@ export function getRepoParagraph(repo: Repository): string {
         <break time="300ms"/>
         <p>${description}</p>
         <p>
-            This repository got <say-as interpret-as="cardinal">${repo.stars}</say-as> stars in total, with <say-as interpret-as="cardinal">${repo.starsToday}</say-as> stars achieved today.
+            This repository got <say-as interpret-as="cardinal">${repo.stars}</say-as> stars in total, with <say-as interpret-as="cardinal">${repo.starsInPeriod}</say-as> stars achieved ${periodText}.
         </p>
     `;
 }
@@ -22,23 +23,28 @@ export function getRandomMessage(messages: string[]) {
     return messages[randomIndex];
 }
 
-export function getRepoStartMessage(language, period) {
-    const str1 = 'Sure! Here are the trending repositories';
-    const str2 = `on Github`;
+function getPeriodText(period: string) {
     let periodText;
     switch (period) {
         case 'daily':
             periodText = 'today';
             break;
         case 'weekly':
-            periodText = 'in this week';
+            periodText = 'this week';
             break;
         case 'monthly':
-            periodText = 'in this month';
+            periodText = 'this month';
             break;
         default:
             periodText = 'today';
     }
+    return periodText;
+}
+
+export function getRepoStartMessage(language, period) {
+    const str1 = 'Sure! Here are the trending repositories';
+    const str2 = `on Github`;
+    const periodText = getPeriodText(period);
     if (language === '') {
         return `${str1} ${str2} ${periodText}.`;
     }

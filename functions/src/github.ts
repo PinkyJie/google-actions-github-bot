@@ -22,7 +22,7 @@ export function fetchTrending(
                 const stars = $(starSVGs.get(1)).parent()
                     .text().trim()
                     .replace(',', '');
-                const starsToday = $(starSVGs.get(2)).parent()
+                const starsInPeriod = $(starSVGs.get(2)).parent()
                     .text().trim()
                     // 3,960 stars today/this week/month
                     .replace(/ stars .+/, '')
@@ -47,7 +47,7 @@ export function fetchTrending(
                     speakableDescription,
                     language: $(repo).find('[itemprop=programmingLanguage]').text().trim(),
                     stars: parseInt(stars) || 0,
-                    starsToday: parseInt(starsToday) || 0,
+                    starsInPeriod: parseInt(starsInPeriod) || 0,
                 } as Repository);
             });
             return repos;

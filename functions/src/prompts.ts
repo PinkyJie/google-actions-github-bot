@@ -6,7 +6,7 @@ export const WELCOME_MESSAGE = [
     'Hey! I\'m Github Trending. Ready for some exciting repositories? Ask me "the trending repositories for your favorite language" when you are ready.',
 ];
 export const HELP = 'Okay, let me introduce myself. I know all the trending repositories on Github.';
-export const COMMAND_INTRODUCE = 'You can ask me "tell me the trending repositories on Github today". If you are interested of a specific language, just ask me "the trending repositories for Javascript on Github today". Try it now!';
+export const COMMAND_INTRODUCE = 'You can ask me "tell me the trending repositories on Github today or this week". If you are interested of a specific language, just ask me "the trending repositories for Javascript on Github today or this month". Try it now!';
 
 export const NO_INPUT_MORE_REPOSITORIES = [
     'Say "yes", then we can explore more interesting repositories.',
@@ -20,7 +20,7 @@ export const NO_INPUT_OTHER_LANGUAGES = [
 ];
 export const NO_INPUT_WELCOME = [
     'Need some help? Just say "I need some help".',
-    'Try asking me "What\'s the trending repositories today?"',
+    'Try asking me "What\'s the trending repositories today or this week?"',
     'Okay, maybe let\'s talk next time! Goodbye!'
 ]
 
@@ -42,8 +42,8 @@ export const REPOSITORY_NEXT_ONE = [
 ];
 export const REPOSITORY_LAST_ONE = [
     'This is the last one.',
-    'We have no more trending repositories today.',
-    'You\'ve mastered all trending repositories today!',
+    'We have no more trending repositories.',
+    'You\'ve mastered all trending repositories!',
 ];
 export const REPOSITORY_NO_MORE = 'Sorry to hear that you are not interested!';
 export const REPOSITORY_OTHER_LANGUAGE = 'If you want to know the trending for a specific languages, just ask me "Tell me the trending repositories for Javascript today".';

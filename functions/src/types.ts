@@ -11,7 +11,7 @@ export interface Repository {
     speakableDescription: string,
     language: string,
     stars: number,
-    starsToday: number,
+    starsInPeriod: number,
 };
 
 export interface User {

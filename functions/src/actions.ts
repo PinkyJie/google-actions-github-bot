@@ -185,7 +185,7 @@ function handleReprompt(conv: CONV_TYPE, messages) {
 
 function goToNextRepo(conv: CONV_TYPE) {
     const data = conv.data as UserData;
-    const { repositories } = data;
+    const { repositories, period } = data;
     data.currentIndex += 1;
     const nextRepo = repositories[data.currentIndex];
 
@@ -207,7 +207,7 @@ function goToNextRepo(conv: CONV_TYPE) {
     // if next one is the last one
     if (data.currentIndex === repositories.length - 1) {
         conv.ask(wrapWithSpeak([
-            getRepoParagraph(nextRepo),
+            getRepoParagraph(nextRepo, period),
             getRandomMessage(PROMPTS.REPOSITORY_LAST_ONE),
             getRandomMessage(PROMPTS.GOODBYE),
         ]));
@@ -223,7 +223,7 @@ function goToNextRepo(conv: CONV_TYPE) {
         );
         const askForStarOrForNext = Math.random() > 0.5;
         conv.ask(wrapWithSpeak([
-            getRepoParagraph(nextRepo),
+            getRepoParagraph(nextRepo, period),
             askForStarOrForNext ?
                 getRandomMessage(PROMPTS.ASK_FOR_NEXT_REPOSITORIES) :
                 getRandomMessage(PROMPTS.ASK_FOR_STAR_REPOSITORY),
