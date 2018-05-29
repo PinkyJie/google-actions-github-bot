@@ -12,7 +12,7 @@ Just say "Talk to Github Trending" to your Google Assistant on either Android, i
 ## Tech
 
 * Use [Dialogflow](https://dialogflow.com/) to build actions(you can think it as Voice command and interaction).
-* Use Firebase functions(https://firebase.google.com/) to handle voice command and give response.
+* Use [Firebase functions](https://firebase.google.com/) to handle voice command and give response.
 
 ## Features
 
