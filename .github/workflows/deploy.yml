@@ -1,0 +1,28 @@
+name: Deploy to Firebase
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "!*.md"
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.x]
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-node@v1
+      - name: Install yarn
+        run: npm install -g yarn
+      - name: Change folder to `functions`
+        run: cd functions
+      - name: Install dependencies
+        run: yarn install
+      - name: Deploy
+        run: yarn deploy
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
