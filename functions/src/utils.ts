@@ -1,11 +1,14 @@
 import { Repository, User } from './types';
 
 export function getRepoParagraph(repo: Repository, period: string): string {
-    const langStr = repo.language ? ` using language <emphasis>${repo.language}</emphasis>` : '';
+    const langStr = repo.language
+        ? ` using language <emphasis>${repo.language}</emphasis>`
+        : '';
     const periodText = getPeriodText(period);
-    const description = repo.speakableDescription === '' ?
-        'There is no description for this repository yet.' :
-        `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>`;
+    const description =
+        repo.speakableDescription === ''
+            ? 'There is no description for this repository yet.'
+            : `The description for the repository is <emphasis>${repo.speakableDescription}</emphasis>`;
     return `
         <p>
             The repository named <emphasis>${repo.name}</emphasis>, which is created by <emphasis>${repo.author}</emphasis>${langStr}
@@ -52,11 +55,7 @@ export function getRepoStartMessage(language, period) {
 }
 
 export function wrapWithSpeak(array) {
-    return [
-        '<speak>',
-            ...array,
-        '</speak>'
-    ].join('<break />');
+    return ['<speak>', ...array, '</speak>'].join('<break />');
 }
 
 export function getStarredMessage(repo: Repository) {

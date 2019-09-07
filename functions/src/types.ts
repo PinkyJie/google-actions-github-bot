@@ -1,35 +1,32 @@
-import {
-    DialogflowConversation,
-    Contexts,
-} from 'actions-on-google';
+import { DialogflowConversation, Contexts } from 'actions-on-google';
 
 export interface Repository {
-    author: string,
-    name: string,
-    href: string,
-    description: string,
-    speakableDescription: string,
-    language: string,
-    stars: number,
-    starsInPeriod: number,
-};
+    author: string;
+    name: string;
+    href: string;
+    description: string;
+    speakableDescription: string;
+    language: string;
+    stars: number;
+    starsInPeriod: number;
+}
 
 export interface User {
-    login: string,
-    id: number,
-    name: string,
-};
+    login: string;
+    id: number;
+    name: string;
+}
 
 export interface UserData {
-    repositories: Repository[],
-    currentIndex: number,
-    language: string,
-    period: string,
-    hasRejected: boolean,
-};
+    repositories: Repository[];
+    currentIndex: number;
+    language: string;
+    period: string;
+    hasRejected: boolean;
+}
 
 export type CONV_TYPE = DialogflowConversation<{}, {}, Contexts>;
 
 export interface IntentResult {
-    status: string,
+    status: string;
 }
